@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: 'Inter', sans-serif;
+}
+
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: #0D5C63;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 40;
+}
+
+.main-content {
+  margin-left: 240px;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main-content { margin-left: 0; padding-bottom: 80px; }
+}
