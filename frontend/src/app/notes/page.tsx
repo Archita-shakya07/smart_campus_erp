@@ -486,7 +486,11 @@ export default function NotesPage() {
 
               {/* Chapters List Container */}
               {isExpanded && subjectData.chapters.length > 0 && (
-                <div className="border-t divide-y pl-4 pr-2 bg-gray-50/30" style={{ borderColor: style.border, divideColor: style.border }}>
+                //  CORRECTED (Perfect for TypeScript & Vercel builds)
+                <div 
+                  className="bg-white/50 border rounded-xl p-4 shadow-sm" 
+                  style={{ borderColor: style.border }}
+                >
                   {subjectData.chapters.map((chapter) => (
                     <div
                       key={chapter.id}
