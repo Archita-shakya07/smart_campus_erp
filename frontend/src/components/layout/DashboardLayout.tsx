@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Sidebar from "./Sidebar";
-import BottomNav from "./BottomNav";
+
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -36,7 +36,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="main-content">
         {children}
       </div>
-      <BottomNav />
     </div>
   );
 }

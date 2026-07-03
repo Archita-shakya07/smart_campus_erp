@@ -4,23 +4,66 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import { toast } from "sonner";
-import { GraduationCap, BookOpen, Users, Award, Lock, BarChart3 } from "lucide-react";
+import { GraduationCap, BookOpen, Users, Award, Lock, BarChart3, AlertCircle } from "lucide-react";
+
+const STREAM_OPTIONS = ["Science", "Commerce", "Arts", "Engineering", "Medical"];
+
+// Fixed passkeys - change these to your desired values
+const PASSKEYS = {
+  student: "STUDENT2024",
+  admin: "ADMIN2024",
+};
 
 export default function RegisterPage() {
   const [role, setRole] = useState<"student" | "admin" | null>(null);
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [passkey, setPasskey] = useState("");
+  const [passKeyError, setPassKeyError] = useState("");
+  const [showPassKey, setShowPassKey] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    rollNumber: "",
+    dob: "",
+    stream: "",
+  });
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
   const handleRoleSelect = (selectedRole: "student" | "admin") => {
     setRole(selectedRole);
+    setPasskey("");
+    setPassKeyError("");
+  };
+
+  const validatePasskey = () => {
+    if (!role) return false;
+    const correctPasskey = role === "admin" ? PASSKEYS.admin : PASSKEYS.student;
+
+    if (passkey.trim() === "") {
+      setPassKeyError("Passkey is required");
+      return false;
+    }
+    if (passkey.toUpperCase() !== correctPasskey) {
+      setPassKeyError("❌ Invalid passkey for this role.");
+      return false;
+    }
+    setPassKeyError("");
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!role) {
       toast.error("Please select a role");
+      return;
+    }
+    if (!validatePasskey()) {
+      return;
+    }
+    if (!form.stream) {
+      toast.error("Please select stream");
       return;
     }
     setLoading(true);
@@ -31,8 +74,7 @@ export default function RegisterPage() {
       });
       login(res.data.data.token, res.data.data.user);
       toast.success("Account created successfully!");
-      
-      // Route based on role
+
       const dashboardRoute = role === "admin" ? "/admin-dashboard" : "/dashboard";
       router.push(dashboardRoute);
     } catch (err: any) {
@@ -46,7 +88,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex">
       {/* Left Panel */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden" style={{background: "linear-gradient(135deg, #0D5C63 0%, #134E4A 40%, #0a3d44 100%)"}}>
-        
+
         <div className="absolute top-[-80px] left-[-80px] w-96 h-96 rounded-full opacity-10" style={{background: "radial-gradient(circle, #22C55E, transparent)"}}></div>
         <div className="absolute bottom-[-100px] right-[-60px] w-80 h-80 rounded-full opacity-10" style={{background: "radial-gradient(circle, #22C55E, transparent)"}}></div>
         <div className="absolute inset-0 opacity-5" style={{backgroundImage: "linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px)", backgroundSize: "40px 40px"}}></div>
@@ -112,11 +154,11 @@ export default function RegisterPage() {
           </div>
 
           {/* Role Selection */}
-          <div className="mb-8 space-y-3">
+          <div className="mb-6 space-y-3">
             <label className="block text-sm font-semibold text-gray-700">Select Your Role</label>
-            
-            {/* Student Role Button */}
+
             <button
+              type="button"
               onClick={() => handleRoleSelect("student")}
               className={`w-full p-4 rounded-xl border-2 transition ${
                 role === "student"
@@ -125,10 +167,7 @@ export default function RegisterPage() {
               }`}
             >
               <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{background: "rgba(13,92,99,0.1)"}}
-                >
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{background: "rgba(13,92,99,0.1)"}}>
                   <GraduationCap size={20} style={{color: "#0D5C63"}} />
                 </div>
                 <div className="text-left">
@@ -141,8 +180,8 @@ export default function RegisterPage() {
               </div>
             </button>
 
-            {/* Admin Role Button */}
             <button
+              type="button"
               onClick={() => handleRoleSelect("admin")}
               className={`w-full p-4 rounded-xl border-2 transition ${
                 role === "admin"
@@ -151,10 +190,7 @@ export default function RegisterPage() {
               }`}
             >
               <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{background: "rgba(13,92,99,0.1)"}}
-                >
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{background: "rgba(13,92,99,0.1)"}}>
                   <Lock size={20} style={{color: "#0D5C63"}} />
                 </div>
                 <div className="text-left">
@@ -167,6 +203,41 @@ export default function RegisterPage() {
               </div>
             </button>
           </div>
+
+          {/* NEW: Passkey field - only shows once role picked */}
+          {role && (
+            <div className="mb-8">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <div className="flex items-center gap-2">
+                  <Lock size={16} />
+                  Access Passkey
+                  (Temporary : STUDENT2024 / ADMIN2024)
+                </div>
+              </label>
+              <input
+                type="text"
+                required
+                value={passkey}
+                onChange={(e) => {
+                  setPasskey(e.target.value.toUpperCase());
+                  setPassKeyError("");
+                }}
+                className={`w-full px-4 py-3.5 border-2 rounded-xl focus:outline-none bg-white text-gray-800 transition-colors font-semibold tracking-wider uppercase ${
+                  passKeyError ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-teal-600"
+                }`}
+                placeholder={`Enter ${role} passkey`}
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Ask your institution admin for the correct passkey for this role.
+              </p>
+              {passKeyError && (
+                <div className="mt-2 flex items-start gap-2 p-3 rounded-lg" style={{background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)"}}>
+                  <AlertCircle size={16} style={{color: "#EF4444", marginTop: "2px", flexShrink: 0}} />
+                  <p className="text-sm font-semibold" style={{color: "#DC2626"}}>{passKeyError}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -204,6 +275,46 @@ export default function RegisterPage() {
                 placeholder="Min 8 chars, 1 uppercase, 1 number"
               />
               <p className="text-xs text-gray-400 mt-1">Must have 1 uppercase letter and 1 number</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Roll Number</label>
+              <input
+                type="text"
+                required
+                value={form.rollNumber}
+                onChange={(e) => setForm({ ...form, rollNumber: e.target.value })}
+                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-teal-600 bg-white text-gray-800 transition-colors"
+                placeholder="e.g. 21CS045"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Date of Birth</label>
+              <input
+                type="date"
+                required
+                value={form.dob}
+                onChange={(e) => setForm({ ...form, dob: e.target.value })}
+                className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-teal-600 bg-white text-gray-800 transition-colors"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Stream</label>
+                <select
+                  required
+                  value={form.stream}
+                  onChange={(e) => setForm({ ...form, stream: e.target.value })}
+                  className="w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-teal-600 bg-white text-gray-800 transition-colors"
+                >
+                  <option value="" disabled>Select stream</option>
+                  {STREAM_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {!role && (

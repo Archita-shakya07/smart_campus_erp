@@ -11,28 +11,28 @@ import { useAuth as useAuthContext } from "@/context/AuthContext";
 const dummyNotices: Notice[] = [
   {
     _id: "n1",
-    title: "End Semester Examination Schedule Out",
+    title: "📝 End Semester Examination Schedule Out",
     body: "The final examination schedule for all courses has been uploaded on the portal. Practical exams will commence from next Monday. Ensure all dues are cleared.",
     category: "exam",
     createdAt: new Date().toISOString()
   },
   {
     _id: "n2",
-    title: "Annual Cultural Fest - Renaissance 2026",
+    title: "🎉 Annual Cultural Fest - Renaissance 2026",
     body: "Registrations are now open for main stage events, solo dancing, singing, and gaming tournaments. Contact your respective student union representative.",
     category: "event",
     createdAt: new Date(Date.now() - 86400000).toISOString()
   },
   {
     _id: "n3",
-    title: "Id-ul-Zuha (Bakrid) Holiday Declaration",
+    title: "🌙 Id-ul-Zuha (Bakrid) Holiday Declaration",
     body: "The college will remain closed tomorrow on account of Id-ul-Zuha. Classes will resume as regular from the day after tomorrow.",
     category: "holiday",
     createdAt: new Date(Date.now() - 172800000).toISOString()
   },
   {
     _id: "n4",
-    title: "New Python & Web Dev Coding Batches",
+    title: "🚀 New Python & Web Dev Coding Batches",
     body: "Special weekend coding lab classes are starting this Friday for cloud computing and JavaScript frameworks. Limited seats available per section.",
     category: "general",
     createdAt: new Date(Date.now() - 259200000).toISOString()
@@ -82,7 +82,7 @@ export default function NoticesPage() {
       setNotices([newNotice, ...notices]);
       setForm({ title: "", body: "", category: "general" });
       setShowForm(false);
-      toast.success("Notice posted!");
+      toast.success("Notice posted! 🚀");
     } catch (e) {
       const newNotice: Notice = {
         _id: String(Date.now()),
@@ -94,7 +94,7 @@ export default function NoticesPage() {
       setNotices([newNotice, ...notices]);
       setForm({ title: "", body: "", category: "general" });
       setShowForm(false);
-      toast.success("Notice posted locally!");
+      toast.success("Notice posted locally! 💾");
     }
   };
 
@@ -102,10 +102,10 @@ export default function NoticesPage() {
     try {
       await api.delete(`/notices/${id}`);
       setNotices(notices.filter((n) => n._id !== id));
-      toast.success("Notice deleted!");
+      toast.success("Notice deleted! 🗑️");
     } catch (e) {
       setNotices(notices.filter((n) => n._id !== id));
-      toast.success("Notice deleted locally!");
+      toast.success("Notice deleted locally! 💾");
     }
   };
 
@@ -114,11 +114,44 @@ export default function NoticesPage() {
     filtered = notices.filter((n) => n.category === selectedCategory);
   }
 
-  const catColor: Record<string, string> = {
-    general: "#0D5C63",
-    exam: "#EF4444",
-    event: "#8B5CF6",
-    holiday: "#22C55E",
+  // Color mapping matching image_0674c8.png
+  const cardStyles: Record<string, { bg: string; border: string; accent: string; text: string; emoji: string }> = {
+    general: {
+      bg: "#E6F4F1",       // Soft Dark Teal Tint (Data Structures)
+      border: "#C2E2DC",
+      accent: "#0D5C63",
+      text: "#06373C",
+      emoji: "📢"
+    },
+    exam: {
+      bg: "#FEE2E2",       // Soft Red/Coral Tint (DBMS Assignment)
+      border: "#FCA5A5",
+      accent: "#EF4444",
+      text: "#991B1B",
+      emoji: "✍️"
+    },
+    event: {
+      bg: "#F3E8FF",       // Soft Purple Tint (Web Development)
+      border: "#E9D5FF",
+      accent: "#8B5CF6",
+      text: "#5B21B6",
+      emoji: "✨"
+    },
+    holiday: {
+      bg: "#DCFCE7",       // Soft Green Tint (Software Engineering)
+      border: "#BBF7D0",
+      accent: "#22C55E",
+      text: "#166534",
+      emoji: "🌴"
+    },
+  };
+
+  const categoryEmojis: Record<string, string> = {
+    all: "🌐",
+    general: "📢",
+    exam: "✍️",
+    event: "✨",
+    holiday: "🌴"
   };
 
   if (loading) {
@@ -141,15 +174,15 @@ export default function NoticesPage() {
           className="flex items-center gap-2 text-teal-700 hover:text-teal-800 font-bold text-sm uppercase tracking-wider transition-colors group"
         >
           <span className="text-xl transition-transform group-hover:-translate-x-1">←</span> 
-          Back to Dashboard
+          Back to Dashboard 🏠
         </button>
       </div>
 
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Notice Board</h1>
-            <p className="text-gray-500 mt-1">Stay updated with college announcements</p>
+            <h1 className="text-2xl font-bold text-gray-800">📌 Notice Board</h1>
+            <p className="text-gray-500 mt-1">Stay updated with college announcements🔔</p>
           </div>
           {user?.role === "admin" && (
             <button
@@ -157,7 +190,7 @@ export default function NoticesPage() {
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-medium transition-all"
               style={{ background: "linear-gradient(135deg, #0D5C63, #134E4A)" }}
             >
-              <Plus size={18} /> Post Notice
+              <Plus size={18} /> Post Notice 📝
             </button>
           )}
         </div>
@@ -170,7 +203,7 @@ export default function NoticesPage() {
                 required
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
-                placeholder="Notice Title"
+                placeholder="Notice Title 🏷️"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-600"
               />
 
@@ -178,7 +211,7 @@ export default function NoticesPage() {
                 required
                 value={form.body}
                 onChange={(e) => setForm({ ...form, body: e.target.value })}
-                placeholder="Notice Content"
+                placeholder="Notice Content 💬"
                 rows={4}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-600"
               ></textarea>
@@ -188,10 +221,10 @@ export default function NoticesPage() {
                 onChange={(e) => setForm({ ...form, category: e.target.value as any })}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-teal-600"
               >
-                <option value="general">General</option>
-                <option value="exam">Exam</option>
-                <option value="event">Event</option>
-                <option value="holiday">Holiday</option>
+                <option value="general">📢 General</option>
+                <option value="exam">✍️ Exam</option>
+                <option value="event">✨ Event</option>
+                <option value="holiday">🌴 Holiday</option>
               </select>
 
               <div className="flex gap-3">
@@ -199,14 +232,14 @@ export default function NoticesPage() {
                   type="submit"
                   className="flex-1 py-3 bg-teal-700 hover:bg-teal-800 text-white font-semibold rounded-xl transition"
                 >
-                  Post Notice
+                  Publish Notice 📣
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
                   className="flex-1 py-3 border border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition"
                 >
-                  Cancel
+                  Cancel ❌
                 </button>
               </div>
             </form>
@@ -219,12 +252,13 @@ export default function NoticesPage() {
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
-            className="px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all capitalize"
+            className="px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all capitalize flex items-center gap-1.5"
             style={{
               background: selectedCategory === cat ? "#0D5C63" : "#f1f5f9",
               color: selectedCategory === cat ? "white" : "#64748b",
             }}
           >
+            <span>{categoryEmojis[cat]}</span>
             {cat}
           </button>
         ))}
@@ -232,44 +266,62 @@ export default function NoticesPage() {
 
       {filtered.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-400 text-lg">No notices found</p>
+          <p className="text-gray-400 text-lg">🔍 No notices found</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {filtered.map((notice) => (
-            <div
-              key={notice._id}
-              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div>
+          {filtered.map((notice) => {
+            const styles = cardStyles[notice.category] || cardStyles.general;
+            return (
+              <div
+                key={notice._id}
+                className="rounded-2xl p-6 border transition-all hover:shadow-md relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4"
+                style={{ 
+                  backgroundColor: styles.bg, 
+                  borderColor: styles.border,
+                }}
+              >
+                {/* Left accent indicator from image_0674c8.png */}
+                <div 
+                  className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl" 
+                  style={{ backgroundColor: styles.accent }}
+                />
+
+                <div className="pl-2 flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <span
-                      className="text-xs font-bold uppercase px-3 py-1 rounded-full text-white"
-                      style={{ background: catColor[notice.category] }}
+                      className="text-xs font-bold uppercase px-3 py-1 rounded-full text-white flex items-center gap-1"
+                      style={{ background: styles.accent }}
                     >
+                      <span>{styles.emoji}</span>
                       {notice.category}
                     </span>
-                    <span className="text-xs text-gray-400">
-                      {new Date(notice.createdAt).toLocaleDateString()}
+                    <span className="text-xs font-medium opacity-70 flex items-center gap-1" style={{ color: styles.text }}>
+                      📅 {new Date(notice.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-800">{notice.title}</h3>
+                  <h3 className="text-lg font-bold mb-1" style={{ color: styles.text }}>
+                    {notice.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed opacity-90" style={{ color: styles.text }}>
+                    {notice.body}
+                  </p>
                 </div>
 
                 {user?.role === "admin" && (
-                  <button
-                    onClick={() => handleDelete(notice._id)}
-                    className="text-gray-400 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="self-end md:self-center pl-2">
+                    <button
+                      onClick={() => handleDelete(notice._id)}
+                      className="transition-colors opacity-60 hover:opacity-100"
+                      style={{ color: styles.accent }}
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 )}
               </div>
-
-              <p className="text-gray-600 text-sm leading-relaxed">{notice.body}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </DashboardLayout>

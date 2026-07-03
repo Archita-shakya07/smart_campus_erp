@@ -31,6 +31,59 @@ const DUMMY_TIMETABLE: TimetableEntry[] = [
   { _id: "4", day: today, subject: "Software Engineering", teacher: "Prof. Singh", startTime: "03:00 PM", endTime: "04:00 PM", room: "202", colorTag: "#22C55E" },
 ];
 const DUMMY_ATTENDANCE = { overall: 85 };
+
+// ── Bright multicolor palette for rows ───────────────────────────
+const ROW_COLORS = [
+  "#FF6B6B", // coral red
+  "#4ECDC4", // turquoise
+  "#FFD93D", // yellow
+  "#8B5CF6", // purple
+  "#22C55E", // green
+  "#FD79A8", // pink
+  "#0EA5E9", // sky blue
+  "#F97316", // orange
+];
+const getRowColor = (i: number) => ROW_COLORS[i % ROW_COLORS.length];
+
+// ── Emoji maps ────────────────────────────────────────────────────
+const PRIORITY_EMOJI: Record<string, string> = { high: "🔴", medium: "🟡", low: "🟢" };
+const CATEGORY_EMOJI: Record<string, string> = { general: "📘", exam: "📝", event: "🎉", holiday: "🏖️" };
+
+// ── Dummy trend data (for mini sparklines) ───────────────────────
+const TASKS_TREND = [6, 5, 7, 4, 5, 3, 4];
+const NOTICES_TREND = [2, 3, 3, 4, 3, 5, 5];
+const ATTENDANCE_TREND = [78, 80, 76, 82, 84, 83, 85];
+const TASK_PROGRESS_TREND = [40, 48, 45, 55, 60, 58, 65];
+
+// ── Mini sparkline (SVG line graph) ──────────────────────────────
+const Sparkline = ({ data, color, area = false }: { data: number[]; color: string; area?: boolean }) => {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const points = data.map((d, i) => {
+    const x = (i / (data.length - 1)) * 100;
+    const y = 28 - ((d - min) / range) * 24;
+    return `${x},${y}`;
+  });
+  const linePoints = points.join(" ");
+  const areaPoints = `0,30 ${linePoints} 100,30`;
+
+  return (
+    <svg viewBox="0 0 100 30" className="w-full h-8" preserveAspectRatio="none">
+      {area && (
+        <polygon points={areaPoints} fill={color} opacity="0.15" />
+      )}
+      <polyline
+        points={linePoints}
+        fill="none"
+        stroke={color}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
 // ────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -80,30 +133,36 @@ export default function DashboardPage() {
   const attendanceColor =
     attendance.overall >= 75 ? "#22C55E" : attendance.overall >= 60 ? "#F59E0B" : "#EF4444";
 
+  const completedPct =
+    tasks.length > 0 ? Math.round((tasks.filter((t) => t.isCompleted).length / tasks.length) * 100) : 0;
+
   const statCards = [
     {
-      label: "Tasks Due",
+      label: "✅ Tasks Due",
       value: pendingTasks.length,
       icon: CheckSquare,
       color: "#0D5C63",
       bg: "rgba(13,92,99,0.08)",
       sub: `${overdueTasks.length} overdue`,
+      trend: TASKS_TREND,
     },
     {
-      label: "Attendance",
+      label: "📈 Attendance",
       value: `${attendance.overall}%`,
       icon: UserCheck,
       color: attendanceColor,
       bg: `${attendanceColor}22`,
-      sub: attendance.overall >= 75 ? "Good standing" : "Needs attention",
+      sub: attendance.overall >= 75 ? "Good standing 🙌" : "Needs attention ⚠️",
+      trend: ATTENDANCE_TREND,
     },
     {
-      label: "New Notices",
+      label: "🔔 New Notices",
       value: notices.length,
       icon: Bell,
       color: "#8B5CF6",
       bg: "rgba(139,92,246,0.08)",
       sub: "Total notices",
+      trend: NOTICES_TREND,
     },
   ];
 
@@ -123,8 +182,8 @@ export default function DashboardPage() {
     <DashboardLayout>
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-400 mt-1 text-sm">Welcome back, {user?.name?.split(" ")[0] || "Student"}!</p>
+        <h1 className="text-2xl font-bold text-gray-800">📊 Dashboard</h1>
+        <p className="text-gray-400 mt-1 text-sm">👋 Welcome back, {user?.name?.split(" ")[0] || "Student"}!</p>
       </div>
 
       {/* Stat Cards — 3 col like screenshot */}
@@ -134,10 +193,25 @@ export default function DashboardPage() {
             key={card.label}
             className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
           >
-            <p className="text-3xl font-bold" style={{ color: card.color }}>
-              {card.value}
-            </p>
-            <p className="text-sm font-semibold text-gray-600 mt-1">{card.label}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-3xl font-bold" style={{ color: card.color }}>
+                  {card.value}
+                </p>
+                <p className="text-sm font-semibold text-gray-600 mt-1">{card.label}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{card.sub}</p>
+              </div>
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: card.bg }}
+              >
+                <card.icon size={22} style={{ color: card.color }} />
+              </div>
+            </div>
+            {/* Mini trend line graph */}
+            <div className="mt-3">
+              <Sparkline data={card.trend} color={card.color} area />
+            </div>
           </div>
         ))}
       </div>
@@ -150,7 +224,7 @@ export default function DashboardPage() {
         >
           <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-red-700">Attendance below 75%!</p>
+            <p className="text-sm font-semibold text-red-700">⚠️ Attendance below 75%!</p>
             <p className="text-xs text-red-500 mt-0.5">
               Your current attendance is {attendance.overall}%. Please attend more classes.
             </p>
@@ -163,25 +237,31 @@ export default function DashboardPage() {
         {/* Today's Schedule */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-gray-800">Today's Schedule</h2>
+            <h2 className="font-bold text-gray-800">🗓️ Today's Schedule</h2>
             <span className="text-xs text-gray-400">{today}</span>
           </div>
           {todayClasses.length === 0 ? (
             <p className="text-gray-400 text-sm text-center py-6">No classes today 🎉</p>
           ) : (
             <div className="space-y-3">
-              {todayClasses.map((cls) => (
-                <div key={cls._id} className="flex items-center gap-3">
-                  <div className="text-xs text-gray-400 w-20 flex-shrink-0">{cls.startTime}</div>
-                  <div className="flex items-center gap-3 flex-1 p-3 rounded-xl" style={{ background: "#f8fafc" }}>
-                    <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: cls.colorTag || "#0D5C63" }}></div>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">{cls.subject}</p>
-                      <p className="text-xs text-gray-400">{cls.room}</p>
+              {todayClasses.map((cls, i) => {
+                const rowColor = cls.colorTag || getRowColor(i);
+                return (
+                  <div key={cls._id} className="flex items-center gap-3">
+                    <div className="text-xs font-bold text-gray-700 w-20 flex-shrink-0">⏰ {cls.startTime}</div>
+                    <div
+                      className="flex items-center gap-3 flex-1 p-3 rounded-xl"
+                      style={{ background: `${rowColor}22`, border: `1px solid ${rowColor}33` }}
+                    >
+                      <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: rowColor }}></div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">📘 {cls.subject}</p>
+                        <p className="text-xs text-gray-500">📍 {cls.room}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -189,28 +269,31 @@ export default function DashboardPage() {
         {/* Upcoming Tasks */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-gray-800">Upcoming Tasks</h2>
+            <h2 className="font-bold text-gray-800">📝 Upcoming Tasks</h2>
             <a href="/tasks" className="text-xs font-semibold" style={{ color: "#0D5C63" }}>View all</a>
           </div>
           {upcomingTasks.length === 0 ? (
             <p className="text-gray-400 text-sm text-center py-6">No pending tasks! 🎉</p>
           ) : (
             <div className="space-y-3">
-              {upcomingTasks.map((task) => {
+              {upcomingTasks.map((task, i) => {
                 const overdue = new Date(task.dueDate) < new Date();
-                const priorityColor =
-                  task.priority === "high" ? "#EF4444" : task.priority === "medium" ? "#F59E0B" : "#22C55E";
+                const rowColor = getRowColor(i);
                 const daysLeft = Math.ceil(
                   (new Date(task.dueDate).getTime() - Date.now()) / 86400000
                 );
                 return (
-                  <div key={task._id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "#f8fafc" }}>
-                    <div className="w-4 h-4 rounded border-2 flex-shrink-0" style={{ borderColor: priorityColor }}></div>
+                  <div
+                    key={task._id}
+                    className="flex items-center gap-3 p-3 rounded-xl"
+                    style={{ background: `${rowColor}22`, border: `1px solid ${rowColor}33` }}
+                  >
+                    <span className="text-base flex-shrink-0">{PRIORITY_EMOJI[task.priority] || "⚪"}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-800 truncate">{task.title}</p>
                     </div>
-                    <p className="text-xs flex-shrink-0" style={{ color: overdue ? "#EF4444" : "#94a3b8" }}>
-                      {overdue ? "Overdue" : `Due in ${daysLeft}d`}
+                    <p className="text-xs flex-shrink-0 font-semibold" style={{ color: overdue ? "#EF4444" : rowColor }}>
+                      {overdue ? "⏳ Overdue" : `Due in ${daysLeft}d`}
                     </p>
                   </div>
                 );
@@ -225,21 +308,23 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Bell size={18} style={{ color: "#0D5C63" }} />
-            <h2 className="font-bold text-gray-800">Recent Notices</h2>
+            <h2 className="font-bold text-gray-800">📢 Recent Notices</h2>
           </div>
           <a href="/notices" className="text-xs font-semibold" style={{ color: "#0D5C63" }}>View All</a>
         </div>
         <div className="space-y-3">
-          {recentNotices.map((notice) => {
-            const catColor: Record<string, string> = {
-              general: "#0D5C63", exam: "#EF4444", event: "#8B5CF6", holiday: "#22C55E",
-            };
+          {recentNotices.map((notice, i) => {
+            const rowColor = getRowColor(i);
             const daysAgo = Math.floor((Date.now() - new Date(notice.createdAt).getTime()) / 86400000);
             return (
-              <div key={notice._id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "#f8fafc" }}>
-                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: catColor[notice.category] || "#0D5C63" }}></div>
+              <div
+                key={notice._id}
+                className="flex items-center gap-3 p-3 rounded-xl"
+                style={{ background: `${rowColor}22`, border: `1px solid ${rowColor}33` }}
+              >
+                <span className="text-base flex-shrink-0">{CATEGORY_EMOJI[notice.category] || "📌"}</span>
                 <p className="text-sm font-semibold text-gray-800 flex-1">{notice.title}</p>
-                <p className="text-xs text-gray-400 flex-shrink-0">{daysAgo}d ago</p>
+                <p className="text-xs flex-shrink-0 font-semibold" style={{ color: rowColor }}>{daysAgo}d ago</p>
               </div>
             );
           })}
@@ -251,23 +336,29 @@ export default function DashboardPage() {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp size={18} style={{ color: "#0D5C63" }} />
-            <h2 className="font-bold text-gray-800">Task Progress</h2>
+            <h2 className="font-bold text-gray-800">📈 Task Progress</h2>
             <span className="ml-auto text-sm font-bold" style={{ color: "#0D5C63" }}>
-              {tasks.filter((t) => t.isCompleted).length}/{tasks.length} completed
+              🏆 {tasks.filter((t) => t.isCompleted).length}/{tasks.length} completed
             </span>
           </div>
           <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
-                width: `${Math.round((tasks.filter((t) => t.isCompleted).length / tasks.length) * 100)}%`,
+                width: `${completedPct}%`,
                 background: "linear-gradient(90deg, #0D5C63, #22C55E)",
               }}
             ></div>
           </div>
           <p className="text-xs text-gray-400 mt-2">
-            {Math.round((tasks.filter((t) => t.isCompleted).length / tasks.length) * 100)}% of tasks completed
+            🎯 {completedPct}% of tasks completed
           </p>
+
+          {/* Weekly progress trend graph */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <p className="text-xs font-semibold text-gray-500 mb-1">📉 Weekly Completion Trend</p>
+            <Sparkline data={TASK_PROGRESS_TREND} color="#0D5C63" area />
+          </div>
         </div>
       )}
     </DashboardLayout>
