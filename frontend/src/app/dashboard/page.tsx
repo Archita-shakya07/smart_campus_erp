@@ -8,29 +8,28 @@ import { CheckSquare, Bell, UserCheck, Clock, TrendingUp, AlertCircle } from "lu
 
 // ── Dummy fallback data ──────────────────────────────────────────
 const DUMMY_TASKS: Task[] = [
-  { _id: "1", title: "DBMS Assignment", isCompleted: false, dueDate: new Date(Date.now() + 86400000).toISOString(), priority: "high" },
-  { _id: "2", title: "Web Project", isCompleted: false, dueDate: new Date(Date.now() + 3 * 86400000).toISOString(), priority: "medium" },
-  { _id: "3", title: "Lab Record", isCompleted: false, dueDate: new Date(Date.now() + 3 * 86400000).toISOString(), priority: "low" },
-  { _id: "4", title: "Math Assignment", isCompleted: true, dueDate: new Date(Date.now() - 86400000).toISOString(), priority: "medium" },
+  { _id: "1", title: "DBMS Assignment", subject: "Database", description: "Complete DBMS assignment", isCompleted: false, dueDate: new Date(Date.now() + 86400000).toISOString(), priority: "high" },
+  { _id: "2", title: "Web Project", subject: "Web Dev", description: "Build web project", isCompleted: false, dueDate: new Date(Date.now() + 3 * 86400000).toISOString(), priority: "medium" },
+  { _id: "3", title: "Lab Record", subject: "Lab", description: "Complete lab record", isCompleted: false, dueDate: new Date(Date.now() + 3 * 86400000).toISOString(), priority: "low" },
+  { _id: "4", title: "Math Assignment", subject: "Mathematics", description: "Solve math problems", isCompleted: true, dueDate: new Date(Date.now() - 86400000).toISOString(), priority: "medium" },
 ];
 
 const DUMMY_NOTICES: Notice[] = [
-  { _id: "1", title: "Internal Hackathon Registration Open", category: "event", createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
-  { _id: "2", title: "Department Meeting on Friday", category: "general", createdAt: new Date(Date.now() - 4 * 86400000).toISOString() },
-  { _id: "3", title: "Mid Sem Exam Schedule Released", category: "exam", createdAt: new Date(Date.now() - 6 * 86400000).toISOString() },
-  { _id: "4", title: "Holiday on 15th August", category: "holiday", createdAt: new Date(Date.now() - 8 * 86400000).toISOString() },
-  { _id: "5", title: "Library Timings Updated", category: "general", createdAt: new Date(Date.now() - 10 * 86400000).toISOString() },
+  { _id: "1", title: "Internal Hackathon Registration Open", body: "Register now for the internal hackathon", category: "event", createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
+  { _id: "2", title: "Department Meeting on Friday", body: "Important department meeting scheduled", category: "general", createdAt: new Date(Date.now() - 4 * 86400000).toISOString() },
+  { _id: "3", title: "Mid Sem Exam Schedule Released", body: "Mid semester exams schedule is now available", category: "exam", createdAt: new Date(Date.now() - 6 * 86400000).toISOString() },
+  { _id: "4", title: "Holiday on 15th August", body: "College will be closed on independence day", category: "holiday", createdAt: new Date(Date.now() - 8 * 86400000).toISOString() },
+  { _id: "5", title: "Library Timings Updated", body: "New library timings are now in effect", category: "general", createdAt: new Date(Date.now() - 10 * 86400000).toISOString() },
 ];
 
 const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
 const DUMMY_TIMETABLE: TimetableEntry[] = [
-  { _id: "1", day: today, subject: "Data Structures", startTime: "09:00 AM", endTime: "10:00 AM", room: "301", colorTag: "#0D5C63" },
-  { _id: "2", day: today, subject: "Web Development", startTime: "11:00 AM", endTime: "12:00 PM", room: "Lab 2", colorTag: "#8B5CF6" },
-  { _id: "3", day: today, subject: "DBMS", startTime: "01:00 PM", endTime: "02:00 PM", room: "105", colorTag: "#F59E0B" },
-  { _id: "4", day: today, subject: "Software Engineering", startTime: "03:00 PM", endTime: "04:00 PM", room: "202", colorTag: "#22C55E" },
+  { _id: "1", day: today, subject: "Data Structures", teacher: "Dr. Sharma", startTime: "09:00 AM", endTime: "10:00 AM", room: "301", colorTag: "#0D5C63" },
+  { _id: "2", day: today, subject: "Web Development", teacher: "Prof. Patel", startTime: "11:00 AM", endTime: "12:00 PM", room: "Lab 2", colorTag: "#8B5CF6" },
+  { _id: "3", day: today, subject: "DBMS", teacher: "Dr. Kumar", startTime: "01:00 PM", endTime: "02:00 PM", room: "105", colorTag: "#F59E0B" },
+  { _id: "4", day: today, subject: "Software Engineering", teacher: "Prof. Singh", startTime: "03:00 PM", endTime: "04:00 PM", room: "202", colorTag: "#22C55E" },
 ];
-
 const DUMMY_ATTENDANCE = { overall: 85 };
 // ────────────────────────────────────────────────────────────────
 
